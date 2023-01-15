@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% load cache %}
+{% block title %}
+  Последние обновления на сайте
+{% endblock title %}
+<main> 
+  {% block content %}
+  {% cache 500 sidebar request.user.username %}
+    <div class="container py-5">     
+      <h1>Последние обновления на сайте</h1>
+        {% for post in page_obj %}
+          <ul>
+            <li>
+              Автор: {{ post.author.get_full_name }} 
+              {% if post.group %} 
+                <a href="{% url 'posts:profile' post.author %}">все посты пользователя</a>
+              {% endif %} 
+            </li>
+            <li>
+              Дата публикации: {{ post.pub_date|date:"d E Y" }}
+            </li>
+            {% thumbnail post.image "600x350" crop="center" upscale=True as im %}
+            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+            {% endthumbnail %} 
+          </ul>      
+          <p>{{ post.text }}</p>
+          {% if post.group %} 
+            <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
+          {% endif %} 
+          {% if not forloop.last %}<hr>{% endif %}
+        {% endfor %} 
+        {% include 'posts/includes/paginator.html' %}
+    </div>  
+    {% endcache %} 
+    {% endblock content %}
+</main>
+<footer class="border-top text-center py-3">
+  {% include 'includes/footer.html' %}
+</footer>
